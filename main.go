@@ -44,6 +44,8 @@ import (
 	"mvdan.cc/garble/internal/literals"
 )
 
+// changed source
+
 var flagSet = flag.NewFlagSet("garble", flag.ContinueOnError)
 
 var (

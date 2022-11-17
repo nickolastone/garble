@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         go-version: [1.18.x, 1.19.x]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/setup-go@v3
@@ -56,43 +56,3 @@ jobs:
       with:
         version: "2022.1.3"
         install-go: false
-
-  # We don't care about GOARCH=386 particularly,
-  # but it helps ensure we support 32-bit hosts and targets well.
-  # TODO: use CGO_ENABLED=1 once we figure out how to install gcc-multilib,
-  # and once gotooltest forwards the value of CGO_ENABLED to the scripts.
-  test-386:
-    runs-on: ubuntu-latest
-    env:
-      GOARCH: 386
-    steps:
-    - uses: actions/setup-go@v3
-      with:
-        go-version: 1.19.x
-    - uses: actions/checkout@v3
-    - name: Test
-      run: go test -timeout=15m ./...
-
-  test-gotip:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install Go
-      env:
-        GO_COMMIT: e5deb1556b230642d544c451a83cb79f641727a3 # 2022-09-24
-      run: |
-        cd $HOME
-        mkdir $HOME/gotip
-        cd $HOME/gotip
-
-        wget -O gotip.tar.gz https://go.googlesource.com/go/+archive/${GO_COMMIT}.tar.gz
-        tar -xf gotip.tar.gz
-        echo "devel go1.20-${GO_COMMIT}" >VERSION
-
-        cd src
-        # GOGC=off helps Go build about 20% faster, if we can spare memory.
-        GOGC=off ./make.bash
-        echo "GOROOT=$HOME/gotip" >>$GITHUB_ENV
-        echo "$HOME/gotip/bin" >>$GITHUB_PATH
-    - uses: actions/checkout@v3
-    - name: Test
-      run: go test -timeout=15m ./...
